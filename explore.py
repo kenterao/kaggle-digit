@@ -9,7 +9,7 @@ import sys
 
 from numpy import genfromtxt
 import matplotlib.pyplot as plt
-
+from sklearn import cross_validation
 
 %pylab inline
 
@@ -27,19 +27,35 @@ class MLData:
         self.k = self.feature.shape[1]
         self.image = [self.feature[i].reshape(28,28) 
             for i in arange(self.n)]
-                        
+
+def imageView(target, feature):
+    image = [feature[i].reshape(28,28) for i in arange(feature.shape[0])]
+    fig = plt.figure(figsize=(6, 6))  # figure size in inches
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.05, wspace=0.05)
+
+    # plot the digits: each image is 8x8 pixels
+    for i in range(64):
+        ax = fig.add_subplot(8, 8, i + 1, xticks=[], yticks=[])
+        ax.imshow(image[i], cmap=plt.cm.binary, interpolation='nearest')
+        
+        # label the image with the target value
+        ax.text(0, 7, str(target[i]))
+
+## Data set
 train = MLData(data_train[:,0], data_train[:,1:])
+imageView(train.target, train.feature)
 
-fig = plt.figure(figsize=(6, 6))  # figure size in inches
-fig.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.05, wspace=0.05)
 
-# plot the digits: each image is 8x8 pixels
-for i in range(64):
-    ax = fig.add_subplot(8, 8, i + 1, xticks=[], yticks=[])
-    ax.imshow(train.image[i], cmap=plt.cm.binary, interpolation='nearest')
-    
-    # label the image with the target value
-    ax.text(0, 7, str(train.target[i]))
+X_train, X_val, y_train, y_val = cross_validation.train_test_split(
+    train.feature, train.target, test_size=0.4)
+
+## Naive Bayes
+from sklearn.naive_bayes import GaussianNB
+gnb = GaussianNB()
+y_hat = gnb.fit(X_train, y_train).predict(X_val)
+1. * (y_hat != y_val).sum() / y_val.shape[0]
+
+imageView(y_hat, X_val)
 
 ## To try:
 ## Naive Bayes
