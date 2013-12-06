@@ -13,64 +13,88 @@ from sklearn import cross_validation
 
 %pylab inline
 
-data_train = genfromtxt('C:/Users/Ken/Projects/kaggle-digit/train.csv', 
-    dtype=int, delimiter=',', skip_header=1)
+# Home windows machine
+#filename = 'C:/Users/Ken/Projects/kaggle-digit/train.csv'
+# Work Fedora machine
+filename = '/home/kterao/git/kaggle-digit/train.csv'
+
+data_train = genfromtxt(filename, dtype=int, delimiter=',', skip_header=1)
 
 #data_test = genfromtxt('C:/Users/Ken/Projects/kaggle-digit/test.csv', 
 #    dtype=int, delimiter=',', skip_header=1)
 
-class MLData:
-    def __init__(self, target, feature):
-        self.target = target
-        self.feature = feature
-        self.n = self.feature.shape[0]
-        self.k = self.feature.shape[1]
-        self.image = [self.feature[i].reshape(28,28) 
-            for i in arange(self.n)]
-
-def imageView(target, feature):
-    image = [feature[i].reshape(28,28) for i in arange(feature.shape[0])]
-    fig = plt.figure(figsize=(6, 6))  # figure size in inches
-    fig.subplots_adjust(left=0, right=1, bottom=0, top=1, hspace=0.05, wspace=0.05)
-
-    # plot the digits: each image is 8x8 pixels
-    for i in range(64):
-        ax = fig.add_subplot(8, 8, i + 1, xticks=[], yticks=[])
-        ax.imshow(image[i], cmap=plt.cm.binary, interpolation='nearest')
-        
-        # label the image with the target value
-        ax.text(0, 7, str(target[i]))
-
 ## Data set
+## Truncate data set for testing
 train = MLData(data_train[:,0], data_train[:,1:])
-imageView(train.target, train.feature)
+X = train.feature
+y = train.target
+print 'num samples', train.n
+imageView(X, y)
+
+## Create jitter function
 
 
-X_train, X_val, y_train, y_val = cross_validation.train_test_split(
-    train.feature, train.target, test_size=0.4)
 
-## Naive Bayes
+
+
+## 5-fold CV
+from sklearn.cross_validation import cross_val_score
+kf = cross_validation.KFold(train.n, n_folds=5)
+
+## Naive Bayes, 5-fold CV
 from sklearn.naive_bayes import GaussianNB
-gnb = GaussianNB()
-y_hat = gnb.fit(X_train, y_train).predict(X_val)
-1. * (y_hat != y_val).sum() / y_val.shape[0]
+clf = GaussianNB()
+scores = cross_val_score(clf, X, y, cv=kf)
+print clf.__str__
+print scores.mean(), scores, '\n'
+####
 
-imageView(y_hat, X_val)
+## Decision Tree Classifier
+from sklearn.tree import DecisionTreeClassifier
+clf = DecisionTreeClassifier(max_depth=None, min_samples_split=1)
+scores = cross_val_score(clf, X, y, cv=kf)
+print clf.__str__
+print scores.mean(), scores, '\n'
+####
+
+## Random Forest Classifier
+from sklearn.ensemble import RandomForestClassifier
+clf = RandomForestClassifier(n_estimators=200, max_depth=None,
+                             min_samples_split=1)
+scores = cross_val_score(clf, X, y, cv=kf)
+print clf.__str__
+print scores.mean(), scores, '\n'
+####
+
+## Extra Trees Classifier
+from sklearn.ensemble import ExtraTreesClassifier
+clf = ExtraTreesClassifier(n_estimators=200, max_depth=None,
+                           min_samples_split=1)
+scores = cross_val_score(clf, X, y, cv=kf)
+print clf.__str__
+print scores.mean(), scores, '\n'
+####
+
+                       
 
 ## To try:
 ## Naive Bayes
 ## SVM
 ## Unsupervised PCA feature extraction
-## Plots to test differentiation of new factors
-## Cross validation methods
 ## Eigen images
-## detect right/left handed?
-## pct of pixels "dark", pct pixels "light"
+## Cross validation methods
+## KNN, cross validation on K
+## Deep Belief Nets
+## Random Forest
+## Dropout
+## Maxout
 
 # Try new factors
+## Plots to test differentiation of new factors
 # Symmetry: across X, across Y, across X on right/left, across Y on top/bottom
 # average intensity: all, right, left, top, bottom, 
 # average of columns and rows
-# 
+# detect right/left handed?
+# pct of pixels "dark", pct pixels "light"
 
 
