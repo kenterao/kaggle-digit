@@ -4,13 +4,15 @@ Created on Thu Dec  5 10:46:56 2013
 
 @author: kterao
 """
-
+#%%
 import os
 import sys
 
 from numpy import genfromtxt
 import matplotlib.pyplot as plt
 from sklearn import cross_validation
+#%%
+
 
 %pylab inline
 os.chdir('/home/kterao/git/kaggle-digit/')

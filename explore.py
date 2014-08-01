@@ -13,6 +13,8 @@ from sklearn import cross_validation
 
 %pylab inline
 
+## This is a test comment
+
 # Home windows machine
 #filename = 'C:/Users/Ken/Projects/kaggle-digit/train.csv'
 # Work Fedora machine
